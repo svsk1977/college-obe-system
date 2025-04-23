@@ -1,4 +1,7 @@
+// admin-dashboard.js
 document.addEventListener('DOMContentLoaded', function() {
+    console.log("Admin dashboard loaded");
+    
     // Check if user is logged in
     firebase.auth().onAuthStateChanged(function(user) {
         if (user) {
@@ -6,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log("User is signed in:", user.email);
             
             // Check if user is admin
-            db.collection('users').doc(user.uid).get()
+            firebase.firestore().collection('users').doc(user.uid).get()
                 .then((doc) => {
                     if (doc.exists && doc.data().role === 'admin') {
                         // User is admin, load dashboard data
@@ -43,17 +46,22 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load dashboard data
     function loadDashboardData() {
         // Count users
-        db.collection('users').get().then((snapshot) => {
+        firebase.firestore().collection('users').get().then((snapshot) => {
             document.getElementById('userCount').textContent = snapshot.size;
+        }).catch(error => {
+            console.error("Error counting users:", error);
         });
         
         // Count programs
-        db.collection('programs').get().then((snapshot) => {
+        firebase.firestore().collection('programs').get().then((snapshot) => {
             document.getElementById('programCount').textContent = snapshot.size;
+        }).catch(error => {
+            console.error("Error counting programs:", error);
+            document.getElementById('programCount').textContent = '0';
         });
         
         // Count courses (if collection exists)
-        db.collection('courses').get().then((snapshot) => {
+        firebase.firestore().collection('courses').get().then((snapshot) => {
             document.getElementById('courseCount').textContent = snapshot.size;
         }).catch(() => {
             // Collection might not exist yet
@@ -61,8 +69,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Count faculty users
-        db.collection('users').where('role', '==', 'faculty').get().then((snapshot) => {
+        firebase.firestore().collection('users').where('role', '==', 'faculty').get().then((snapshot) => {
             document.getElementById('facultyCount').textContent = snapshot.size;
+        }).catch(error => {
+            console.error("Error counting faculty:", error);
+            document.getElementById('facultyCount').textContent = '0';
         });
     }
 });
